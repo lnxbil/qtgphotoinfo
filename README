@@ -1,0 +1,13 @@
+1. Compiling
+
+The software should compile on every platform on which GPhoto and QT is
+supported.
+
+1.1 MacOS
+
+Creating the Makefile with the following commando
+ qmake -spec macx-g++ -config debug QTGPhotoInfo.pro
+and the type make to build the program.
+
+If you have installed gphoto in a different location, please have a look at
+the file local.pro.tmp, which should be copied to local.pro
