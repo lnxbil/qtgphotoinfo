@@ -7,6 +7,7 @@ You need the following packages (most recent versions):
  * libusb-compat (LGPL)
  * jpeg-6b (some kind of royality and fee-free license)
  * libgphoto2 (LGPL)
+ * QT 4.6 (LGPL Version available) 
 
 So using libgphoto2 is completly linked against LGPL libraries.
 
