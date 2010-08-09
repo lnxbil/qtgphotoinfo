@@ -2,9 +2,11 @@
 #define INFODIALOG_H
 
 #include <QDialog>
+
 #include <gphoto2/gphoto2-camera.h>
 
 #include "settingsdialog.h"
+#include "imagedisplaydialog.h"
 
 namespace Ui {
     class InfoDialog;
@@ -31,10 +33,12 @@ private:
 
     GPContext *context;
     Camera *camera;
-    SettingsDialog dialog;
+    SettingsDialog sdialog;
+    ImageDisplayDialog dialog;
 
     void notImplementedError();
-    void setImage(CameraFile *cf, QString &method);
+    void setImage(CameraFile *cf, QString &method, bool out = true);
+
 
 private slots:
     void on_pb_capture_preview_clicked();
@@ -43,6 +47,10 @@ private slots:
     void on_pb_read_settings_clicked();
     void on_pb_capture_image_clicked();
     void on_pb_rescan_clicked();
+
+    void processPreview(CameraFile *cf);
 };
+
+
 
 #endif // INFODIALOG_H

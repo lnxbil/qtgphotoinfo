@@ -1,5 +1,7 @@
 #include "QMessageBox"
+#include "QDebug"
 
+#include "mythread.h"
 #include "infodialog.h"
 #include "imagedisplaydialog.h"
 #include "ui_infodialog.h"
@@ -90,7 +92,7 @@ void InfoDialog::rereadCameraInfo()
     int tmp = 0;
 
     // Creating Context and Camera
-    dialog.clearItems();
+    sdialog.clearItems();
     logMessage(QString("Initializing camera"));
     context = gp_context_new();
     gp_camera_new (&camera);
@@ -264,7 +266,7 @@ void InfoDialog::populateWithConfigs(CameraWidget *cc)
 
             QString n = QString(name);
             QString v = QString(val);
-            dialog.addItem(n,v);
+            sdialog.addItem(n,v);
             //QString log;
             //logMessage(log.sprintf("%s=%s", name, val));
 
@@ -292,7 +294,7 @@ void InfoDialog::populateWithConfigs(CameraWidget *cc)
             //logMessage(log.sprintf("%s=%s", name, val));
             QString n = QString(name);
             QString v = QString(val);
-            dialog.addItem(n,v);
+            sdialog.addItem(n,v);
 
             /*
              string sname = string(name);
@@ -363,11 +365,19 @@ void InfoDialog::on_pb_capture_image_clicked()
 
     QString a = QString("Image Capture - ");
     setImage(cf, a);
+    dialog.exec();
 
     this->setEnabled(true);
 }
 
-void InfoDialog::setImage(CameraFile *cf, QString &method)
+void InfoDialog::processPreview(CameraFile *cf)
+{
+    //qDebug() << "Slot processPreview accessed";
+    QString a = QString("Preview - ");
+    setImage( cf, a, false);
+}
+
+void InfoDialog::setImage(CameraFile *cf, QString &method, bool out)
 {
     unsigned long mysize = 0;
     const char *data = NULL;
@@ -377,20 +387,20 @@ void InfoDialog::setImage(CameraFile *cf, QString &method)
     if (mysize == 0 )
         return;
 
-    // Info about the image
-    QString logmsg = QString("Size of the Image ") + QString::number(mysize) + QString(" bytes with ");
-
-
-    ImageDisplayDialog dialog;
-    dialog.setWindowTitle( method + ui->lb_model->text());
-
     QPixmap pm;
     pm.loadFromData( (uchar*) data,  (uint) mysize);
     dialog.setPixmap(pm);
 
-    logmsg += method + QString::number(pm.width()) + QString("x") + QString::number(pm.height()) ;
-    logMessage( logmsg);
-    dialog.exec();
+    if ( out )
+    {
+        // Info about the image
+        QString logmsg = QString("Size of the Image ") + QString::number(mysize) + QString(" bytes with ");
+
+        dialog.setWindowTitle( method + ui->lb_model->text());
+        logmsg += method + QString::number(pm.width()) + QString("x") + QString::number(pm.height()) ;
+        logMessage( logmsg);
+    }
+    gp_file_free(cf);
 }
 
 void InfoDialog::notImplementedError()
@@ -416,17 +426,30 @@ void InfoDialog::on_pb_capture_movie_clicked()
     notImplementedError();
 }
 
+
+
+
 void InfoDialog::on_pb_capture_preview_clicked()
 {
     this->setEnabled(false);
     QApplication::processEvents();
 
-    CameraFile *cf;
-    result_check( gp_file_new(&cf),"gp_file_new" );
-    result_check( gp_camera_capture_preview( camera, cf, context ),"gp_camera_capture_preview");
+    dialog.setWindowTitle( "Preview - " + ui->lb_model->text());
 
-    QString a = QString("Preview - ");
-    setImage(cf, a);
+    MyThread thread;
+    connect(&thread, SIGNAL(previewAvailable(CameraFile*)),
+            this,    SLOT(processPreview(CameraFile*)));
+    thread.setData(context,camera);
+    qDebug() << "Starting Thread";
+    thread.start();
+    qDebug() << "Thread startet";
+    dialog.exec();
+    qDebug() << "Dialog returned";
+    thread.running = false;
+
+    thread.mysleep(1);
+
+    thread.quit();
 
     this->setEnabled(true);
 }
