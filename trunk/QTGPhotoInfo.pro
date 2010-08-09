@@ -1,10 +1,12 @@
 HEADERS += src/infodialog.h \
     src/imagedisplaydialog.h \
-    src/settingsdialog.h 
+    src/settingsdialog.h \ 
+    src/mythread.h
 SOURCES += src/infodialog.cpp \
     src/main.cpp \
     src/imagedisplaydialog.cpp \
-    src/settingsdialog.cpp 
+    src/settingsdialog.cpp \
+    src/mythread.cpp
 FORMS += forms/infodialog.ui \
     forms/imagedisplaydialog.ui \
     forms/settingsdialog.ui
