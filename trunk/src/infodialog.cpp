@@ -413,7 +413,7 @@ void InfoDialog::notImplementedError()
 
 void InfoDialog::on_pb_read_settings_clicked()
 {
-    dialog.exec();
+    sdialog.exec();
 }
 
 void InfoDialog::on_pb_capture_audio_clicked()
